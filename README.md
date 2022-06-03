@@ -10,7 +10,7 @@ For building and running the application you'll need:
 - JDK 18
 - Maven 3
 
-# Dependencies
+## Dependencies
 
 Browse the Maven pom.xml file for details of libraries and versions used.
 
