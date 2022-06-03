@@ -17,6 +17,8 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 @RestController
@@ -26,8 +28,9 @@ public class ProxyController{
     private RestTemplate restTemplate = new RestTemplate();
 
     //get all github repositories for given user and return GitRepositoryData list
+    @Async
     @GetMapping(value = "userrepo")
-    public ResponseEntity getGithubRepositories(@RequestParam(name = "username") String username){
+    public CompletableFuture<ResponseEntity> getGithubRepositories(@RequestParam(name = "username") String username){
 
         ArrayList<GitRepositoryData> userRepositories = new ArrayList<>();
 
@@ -43,27 +46,32 @@ public class ProxyController{
                 //check if repository is forked - if not get branch and commit data and add element to array
                 if(!repositoryJsonObj.getBoolean("fork")) {
                     String repositoryName = repositoryJsonObj.get("name").toString();
-                    userRepositories.add(new GitRepositoryData(repositoryName,
-                            repositoryJsonObj.getJSONObject("owner").getString("login"),
-                            getBranchesArrayWithLastCommitSHA(repositoryName, username) ));
+                    try {
+                        userRepositories.add(new GitRepositoryData(repositoryName,
+                                repositoryJsonObj.getJSONObject("owner").getString("login"),
+                                getBranchesArrayWithLastCommitSHA(repositoryName, username).get() ));
+                    } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
+                    }
                 }
 
             });
-            return ResponseEntity.ok(userRepositories);
+            return  CompletableFuture.completedFuture(ResponseEntity.ok(userRepositories));
+
      } catch(HttpStatusCodeException e) {
 
             Map<String,Object> responseBody = new HashMap<>();
             responseBody.put("message", new JSONObject(e.getResponseBodyAsString()).getString("message"));
             responseBody.put("status", e.getStatusCode().value());
 
-            return new ResponseEntity(responseBody, HttpStatus.valueOf(e.getStatusCode().value()));
+            return  CompletableFuture.completedFuture(new ResponseEntity(responseBody, HttpStatus.valueOf(e.getStatusCode().value())));
     }
 
     }
 
     //get data for each branch of repository asynchronously
     @Async
-    public Future< ArrayList<RepositoryBranchData> > getBranchesArrayWithLastCommitSHA(String repositoryName, String username) {
+    public CompletableFuture< ArrayList<RepositoryBranchData> > getBranchesArrayWithLastCommitSHA(String repositoryName, String username) throws InterruptedException {
         ArrayList<RepositoryBranchData> branchDataArray = new ArrayList<>();
         ResponseEntity<String> repositoryBranchesResponseData =  restTemplate.getForEntity("https://api.github.com/repos/"+username+"/"+repositoryName+"/branches", String.class);
         JSONArray repositoryBranchJsonDataArray = new JSONArray(repositoryBranchesResponseData.getBody());
@@ -71,8 +79,10 @@ public class ProxyController{
             JSONObject branchJsonObject = new JSONObject(branch.toString());
             branchDataArray.add(new RepositoryBranchData(branchJsonObject.getString("name"), branchJsonObject.getJSONObject("commit").getString("sha")));
         });
-        return new AsyncResult<>(branchDataArray);
+        Thread.sleep(1);
+        return CompletableFuture.completedFuture(branchDataArray);
     }
+
 
     //handle incorrect 'accept' header
     @ResponseBody

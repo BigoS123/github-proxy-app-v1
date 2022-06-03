@@ -8,20 +8,20 @@ public class GitRepositoryData {
     //repository data
 private String repositoryName;
 private String repositoryOwner;
-private Future<ArrayList<RepositoryBranchData>> repositoryBranchData;
+private ArrayList<RepositoryBranchData> repositoryBranchData;
 
-    public GitRepositoryData(String repositoryName, String repositoryOwner, Future<ArrayList<RepositoryBranchData>> repositoryBranchData) {
+    public GitRepositoryData(String repositoryName, String repositoryOwner, ArrayList<RepositoryBranchData> repositoryBranchDataArray) {
         this.repositoryName = repositoryName;
         this.repositoryOwner = repositoryOwner;
-        this.repositoryBranchData = repositoryBranchData;
+        this.repositoryBranchData = repositoryBranchDataArray;
     }
 
-    public Future<ArrayList<RepositoryBranchData>> getRepositoryBranchData() {
+    public ArrayList<RepositoryBranchData> getRepositoryBranchData() {
         return repositoryBranchData;
     }
 
-    public void setRepositoryBranchData(Future<ArrayList<RepositoryBranchData>> repositoryBranchData) {
-        this.repositoryBranchData = repositoryBranchData;
+    public void setRepositoryBranchData(ArrayList<RepositoryBranchData> repositoryBranchDataArray) {
+        this.repositoryBranchData = repositoryBranchDataArray;
     }
 
     public String getRepositoryName() {

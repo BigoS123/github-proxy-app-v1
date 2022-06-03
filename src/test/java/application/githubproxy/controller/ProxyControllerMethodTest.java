@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 
+import java.util.concurrent.CompletableFuture;
+
 import static org.mockito.Mockito.*;
 
 
@@ -17,19 +19,19 @@ class ProxyControllerMethodTest {
     @DisplayName("Should throw 404 not found when user was not found")
     void getGithubRepositories_Throws404_on_user_not_found() {
         var mockProxyController = mock(ProxyController.class);
-        when(mockProxyController.getGithubRepositories("NonExistingUsername1234567")).thenReturn(new ResponseEntity(HttpStatus.NOT_FOUND));
+        when(mockProxyController.getGithubRepositories("NonExistingUsername1234567")).thenReturn(CompletableFuture.completedFuture(new ResponseEntity(HttpStatus.NOT_FOUND)));
     }
 
     @Test
     @DisplayName("Should return status 200 when user was found")
     void getGithubRepositories_Throws200_on_user_found() {
         var mockProxyController = mock(ProxyController.class);
-        when(mockProxyController.getGithubRepositories("BigoS123")).thenReturn(new ResponseEntity(HttpStatus.OK));
+        when(mockProxyController.getGithubRepositories("BigoS123")).thenReturn(CompletableFuture.completedFuture(new ResponseEntity(HttpStatus.OK)));
     }
 
     @Test
     @DisplayName("Should return status 200 when user was found")
-    void getGithubRepositories_Throws200_on_user_found1() {
+    void getGithubRepositories_Throws200_on_user_found1() throws InterruptedException {
         var mockProxyController = mock(ProxyController.class);
         when(mockProxyController.getBranchesArrayWithLastCommitSHA("nonexistingrepo","BigoS123")).thenReturn(null);
     }
