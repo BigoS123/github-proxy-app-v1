@@ -24,7 +24,7 @@ public class GithubproxyApplication {
         executor.setCorePoolSize(2);
         executor.setMaxPoolSize(2);
         executor.setQueueCapacity(500);
-        executor.setThreadNamePrefix("GithubLookup-");
+        executor.setThreadNamePrefix("GithubProxy-");
         executor.initialize();
         return executor;
     }
